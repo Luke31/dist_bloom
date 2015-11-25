@@ -31,7 +31,9 @@ public class Terminal {
 	    }
 	    //Must be true
 	    for(String str : read.getContainedList()){
-	    	assert ! filter.contains(str) : "" + str + " ist in Liste wurde aber nicht erkannt.";
+	    	if(!filter.contains(str)){
+	    		throw new IllegalStateException("" + str + " ist in Liste wurde aber nicht erkannt.");
+	    	}
 	    }
 	}
 	
