@@ -47,7 +47,7 @@ public class BloomFilter {
 		this.k = (int) optK;
 		hashFunctions = new HashFunction[k];
 		for(int i = 0; i < k; i++){
-			int seed = i; //TODO: Try different seed?
+			int seed = i;
 			hashFunctions[i] = Hashing.murmur3_128(seed);
 		}
 		
