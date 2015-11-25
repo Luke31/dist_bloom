@@ -14,7 +14,7 @@ import com.google.common.hash.Hashing;
  */
 public class BloomFilter {
 	private int n; //Expected elements
-	private double p; //Desired False positive Probabilty
+	private double p; //Desired False positive Probabilty (The lower the better)
 	private double optM; //Optimal Array-size
 	private int m; //"Rounded" int Array-size
 	private double optK; //Optimal number of Hash-functions
@@ -33,26 +33,49 @@ public class BloomFilter {
 		
 		//Calculate Array-size and create Array
 		this.optM = -(n*Math.log(p))/(Math.log(2)*Math.log(2)); //Calc optimal array-size m
+		if(this.optM == 0){
+			throw new IllegalStateException("Array size is 0 - increase n [or decrease p]");
+		}
 		this.m = (int) optM;
 		bitArr = new boolean[m];
 		
 		//Calculate number of HashFunctions, create array and generate hash-functions
 		this.optK = m/n * Math.log(2); //Calc optimal number of hash-functions k
+		if(this.optK == 0){
+			throw new IllegalStateException("Number of Hash Functions is 0 - decrease p or [increase n]");
+		}
 		this.k = (int) optK;
 		hashFunctions = new HashFunction[k];
 		for(int i = 0; i < k; i++){
 			int seed = i; //TODO: Try different seed?
 			hashFunctions[i] = Hashing.murmur3_128(seed);
 		}
+		
+		
+		
 	}
 	
+	/**
+	 * Check if list contains str
+	 * @param str String to check if in list
+	 * @return True if maybe in list, False if definitely not in list
+	 */
 	public boolean contains(String str){
-		//TODO
-		return false;
+		boolean contained = true;
+		for(int idx : getArrIndexes(str)){
+			contained &= bitArr[idx];
+		}
+		return contained;
 	}
 	
+	/**
+	 * Add String to list
+	 * @param str String to add to list
+	 */
 	public void add(String str){
-		//TODO
+		for(int idx : getArrIndexes(str)){
+			bitArr[idx] = true;
+		}
 	}
 	
 	private int[] getArrIndexes(String str){
@@ -64,6 +87,6 @@ public class BloomFilter {
 	}
 	
 	private int getArrIdx(HashCode hashCode){
-		return hashCode.asInt() % m;
+		return Math.abs(hashCode.asInt()) % m; //asInt may return negative values
 	}
 }
